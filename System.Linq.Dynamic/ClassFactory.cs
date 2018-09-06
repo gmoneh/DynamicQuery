@@ -19,7 +19,12 @@ namespace System.Linq.Dynamic
 		private ClassFactory()
 		{
 			AssemblyName name = new AssemblyName("DynamicClasses");
+#if NETSTANDARD
+			AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.Run);
+#else
 			AssemblyBuilder assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(name, AssemblyBuilderAccess.Run);
+#endif
+
 #if ENABLE_LINQ_PARTIAL_TRUST
             new ReflectionPermission(PermissionState.Unrestricted).Assert();
 #endif
@@ -73,7 +78,11 @@ namespace System.Linq.Dynamic
 					FieldInfo[] fields = GenerateProperties(tb, properties);
 					GenerateEquals(tb, fields);
 					GenerateGetHashCode(tb, fields);
+#if NETSTANDARD
+					Type result = tb.CreateTypeInfo();
+#else
 					Type result = tb.CreateType();
+#endif
 					classCount++;
 					return result;
 				}
